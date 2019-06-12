@@ -6,6 +6,7 @@
 int tokenIdx = 0;
 char *tokens;
 
+int T();
 int E();
 int F();
 
@@ -59,7 +60,7 @@ void genOp2(int i, int i1, char op, int i2) {
 int F() {
   int f;
   char c = ch();
-  if (isdigit(c)) {
+  if (isdigit(c)||isalpha(c)) {
     next(); // skip c
     f = nextTemp();
     genOp1(f, c);
@@ -74,12 +75,25 @@ int F() {
   return f; 
 }
 
-// E = F ([+-] F)*
+// T =F ([*/] F)*
+int T(){
+  int t1 = F();
+  while (isNext("*/")) {
+    char op=next();
+    int t2 = F();
+    int t = nextTemp();
+    genOp2(t, t1, op, t2);
+    t1 = t;
+  }
+  return t1;
+}
+
+// E = T ([+-] T)*
 int E() {
-  int i1 = F();
+  int i1 = T();
   while (isNext("+-")) {
     char op=next();
-    int i2 = F();
+    int i2 = T();
     int i = nextTemp();
     genOp2(i, i1, op, i2);
     i1 = i;
@@ -95,7 +109,9 @@ void parse(char *str) {
 int main(int argc, char * argv[]) {
   printf("=== EBNF Grammar =====\n");
   printf("E=F ([+-] F)*\n");
+  printf("T=F ([*/] F)*\n");
   printf("F=Number | '(' E ')'\n");
   printf("==== parse:%s ========\n", argv[1]);
   parse(argv[1]);
 }
+
